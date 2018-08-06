@@ -14,6 +14,8 @@ const twitter = new twit({
   access_token_secret:  apikeys.config.access_token_secret
 })
 
+const defaultUserId = apikeys.config.consumer_key.slice(0,8);
+
 // This is a Promise wrapper for twit.get() requests that accepts an array with
 // the first two parameters for twit.get(), path & options, and returns a
 // pending Promise for twit.get() which can be processed with .then() & .catch()
@@ -22,22 +24,22 @@ const twitPromise = twitArgs => {
     twitter.get(...twitArgs, (err, data, response) => resolve(data));
 })}
 
-// Accepts a screen_name and returns an object whose values hold request params
+// Accepts a user_id and returns an object whose values hold request params
 // [path, {options}], which can either be passed directly into twitPromise, or
 // passed into twit.get as its first two parameters using the spread operator
-const twitRequests = screen_name => ({
-  tweets: [`statuses/user_timeline`, {screen_name, count: 5}],
-  friends: [`friends/list`, {screen_name, skip_status: true, include_user_entities: false, cursor: -1}],
-  dms: [`direct_messages/events/list`, {screen_name}],
-  userprofile: [`/users/show`, {screen_name}],
+const twitRequests = user_id => ({
+  tweets: [`statuses/user_timeline`, {user_id, count: 5}],
+  friends: [`friends/list`, {user_id, skip_status: true, include_user_entities: false, cursor: -1}],
+  dms: [`direct_messages/events/list`, {user_id}],
+  userprofile: [`/users/show`, {user_id}],
 });
 
-// Accepts a username which is passed to twitRequests, then iterates through all
+// Accepts a userId which is passed to twitRequests, then iterates through all
 // requests in twitRequests and returns an object holding the raw responses of
 // both successful and failed attempts for further processing
-const getTwitRequests = async function(username) {
+const getTwitRequests = async function(userId) {
   const twitsData = {};
-  for (const [key, twitArgs] of Object.entries(twitRequests(username))) {
+  for (const [key, twitArgs] of Object.entries(twitRequests(userId))) {
     await twitPromise(twitArgs)
       .catch(err => {twitsData[key] = err})
       .then(data => {twitsData[key] = data})
@@ -46,9 +48,9 @@ const getTwitRequests = async function(username) {
 }
 
 app.get('/', (req, res) => {
-  +async function(username = "thatkyle") {
+  +async function(userId = defaultUserId) {
     let dms, tweets, friends, userprofile;
-    renderData = await getTwitRequests(username)
+    renderData = await getTwitRequests(userId)
     if (! renderData.userprofile.errors || renderData.userprofile !== undefined) {
       userprofile = renderData.userprofile;
     }
