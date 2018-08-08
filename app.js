@@ -73,8 +73,8 @@ app.get('/', (req, res) => {
     if (! renderData[0].friends.errors || renderData[0].friends !== undefined) {
       users = renderData[0].friends;
     }
-    if (! renderData[0].dms.errors || renderData[0].dms !== undefined) {
-      dms = renderData[0].dms;
+    if (! renderData[1].dms.errors || renderData[1].dms !== undefined) {
+      dms = renderData[1].dms;
     }
     userprofile = renderData[1].userprofile;
     res.render('layout', {

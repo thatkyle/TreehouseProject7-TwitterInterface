@@ -132,9 +132,10 @@ html(lang="en")
                 | Conversation with
                 a  @#{profileScreenName}
               ul.app--message--conversation
-                if dms[0]
+                if dms.events[0]
                   each dm in dms.events.slice(0,5)
-                    p #{dm.create_timestamp}
+                    - var dmDate = new Date(parseInt(dm.created_timestamp))
+                    p #{dmDate.toString().slice(0,25)}
                     p #{dm.message_create.message_data.text}
                 else
                   p No Recent Activity
